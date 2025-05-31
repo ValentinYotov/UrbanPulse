@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <!-- Задаване на основните мета тагове и връзки към външни ресурси -->
     <meta charset="UTF-8"> <!-- Определя енкодинга на страницата като UTF-8 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Позволява коректно рендиране на мобилни устройства -->
-    <title>Urban Guardian - Карта на инциденти</title> <!-- Заглавие на страницата -->
+    <title>Urban Guardian - Incident Map</title> <!-- Заглавие на страницата -->
     
     <!-- Връзка към шрифт от Google Fonts с различни дебелини -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
@@ -151,10 +151,10 @@
         <div class="logo">Urban Guardian</div>
         <nav class="navbar">
             <ul class="nav-list">
-                <li><a href="index.html">Начало</a></li>
-                <li><a href="report.html">Докладване</a></li>
-                <li><a href="statistics.html">Статистики</a></li>
-                <li><a href="about.html">Относно проекта</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="report.html">Report</a></li>
+                <li><a href="statistics.html">Statistics</a></li>
+                <li><a href="about.html">About</a></li>
             </ul>
         </nav>
     </header>
@@ -165,15 +165,15 @@
         <div class="legend" id="legend">
             <div class="legend-item">
                 <div class="legend-dot danger"></div>
-                Опасност
+                Danger
             </div>
             <div class="legend-item">
                 <div class="legend-dot accident"></div>
-                Злополука
+                Accident
             </div>
             <div class="legend-item">
                 <div class="legend-dot infrastructure"></div>
-                Проблем с инфраструктурата
+                Infrastructure Issue
             </div>
         </div>
     </div>
@@ -195,13 +195,13 @@
 
             // Определяне на цвета на маркера според типа на инцидента
             switch (incident.type) {
-                case 'Опасност':
+                case 'Danger':
                     markerColor = 'red';
                     break;
-                case 'Злополука':
+                case 'Accident':
                     markerColor = 'orange';
                     break;
-                case 'Проблем с инфраструктура':
+                case 'Infrastructure Issue':
                     markerColor = 'green';
                     break;
             }
@@ -212,8 +212,8 @@
                 radius: 8
             }).addTo(map);
 
-            var imageGallery = incident.images && incident.images.length > 0 ? `<div><b>Снимки:</b><br>` + incident.images.map(img => `<img src="${img}" style="max-width:100px;margin:5px;border:1px solid #00ff7f;border-radius:5px;">`).join('') + `</div>` : '';
-            marker.bindPopup("<b>" + incident.type + "</b><br>" + incident.description + "<br><b>Адрес:</b> " + incident.address + "<br><b>Дата:</b> " + incident.date + "<br><b></b> " + "<br>" + imageGallery);
+            var imageGallery = incident.images && incident.images.length > 0 ? `<div><b>Images:</b><br>` + incident.images.map(img => `<img src="${img}" style="max-width:100px;margin:5px;border:1px solid #00ff7f;border-radius:5px;">`).join('') + `</div>` : '';
+            marker.bindPopup("<b>" + incident.type + "</b><br>" + incident.description + "<br><b>Address:</b> " + incident.address + "<br><b>Date:</b> " + incident.date + "<br><b></b> " + "<br>" + imageGallery);
         });
 
         // Анимация за появяване на легендата с Anime.js

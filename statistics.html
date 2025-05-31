@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
-    <!-- Определя начина на документа, както и езика (български) -->
+    <!-- Defines the document type and language (English) -->
     <meta charset="UTF-8">
-    <!-- Задава настройките за viewport, за правилно показване на смартфони и други устройства -->
+    <!-- Sets viewport settings for proper display on smartphones and other devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Заглавие на страницата -->
-    <title>Интерактивни Статистики на Инцидентите - Urban Guardian</title>
-    <!-- Включва шрифтове от Google Fonts -->
+    <!-- Page title -->
+    <title>Interactive Incident Statistics - Urban Guardian</title>
+    <!-- Includes Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <!-- Включва икони от Font Awesome -->
+    <!-- Includes Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Включва библиотеката Chart.js за визуализация на графики -->
+    <!-- Includes Chart.js library for visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Включва GSAP за анимации -->
+    <!-- Includes GSAP for animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    <!-- Включва Vanta.js за анимиран фон -->
+    <!-- Includes Vanta.js for animated background -->
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
-    <!-- Включва библиотеката Three.js, които ез нужна за Vanta.js -->
+    <!-- Includes Three.js library, needed for Vanta.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        /* Стилизира тялото на страницата */
+        /* Styles the body of the page */
         body {
             font-family: 'Roboto', sans-serif;
             margin: 0;
@@ -30,7 +30,7 @@
             overflow-x: hidden;
         }
 
-        /* Стилизира хедъра на страницата */
+        /* Styles the header of the page */
         header {
             display: flex;
             justify-content: space-between;
@@ -44,7 +44,7 @@
             box-shadow: 0 4px 10px rgba(0, 255, 127, 0.2);
         }
 
-        /* Стилизира логото */
+        /* Styles the logo */
         .logo {
             font-size: 2em;
             font-weight: bold;
@@ -54,13 +54,13 @@
             transition: all 0.3s ease-in-out;
         }
 
-        /* Анимация при минаване на мишката върху логото */
+        /* Animation when hovering over the logo */
         .logo:hover {
             color: #ffffff;
             text-shadow: 0 0 20px rgba(0, 255, 127, 0.9);
         }
 
-        /* Стилизиране на навигацията */
+        /* Styles the navigation */
         .navbar {
             flex-grow: 1;
             display: flex;
@@ -75,7 +75,7 @@
             margin: 0;
         }
 
-        /* Стил за линковете в навигацията */
+        /* Styles for links in the navigation */
         .nav-list li a {
             color: #ffffff;
             text-decoration: none;
@@ -84,12 +84,12 @@
             transition: color 0.3s ease;
         }
 
-        /* Промяна на цвета при минаване на мишката над линковете */
+        /* Changes color when hovering over links */
         .nav-list li a:hover {
             color: #00ff7f;
         }
 
-        /* Стилизиране на секциите за контент */
+        /* Styles for content sections */
         .content-section {
             padding: 120px 20px;
             text-align: center;
@@ -100,7 +100,7 @@
             overflow: hidden; /* To contain Vanta background */
         }
 
-        /* Стилизиране на графиките и списъците с инциденти */
+        /* Styles for charts and incident lists */
         .chart-container, .incident-list {
             max-width: 800px;
             margin: 0 auto;
@@ -118,7 +118,7 @@
             text-align: left;
         }
 
-        /* Анимация на границите (леко сияние) */
+        /* Border animation (soft glow) */
         @keyframes glowBorder {
             0% {
                 box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
@@ -128,24 +128,24 @@
             }
         }
 
-        /* Стилизиране на елементите в списъците за инциденти */
+        /* Styles for elements in incident lists */
         .incident-item {
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             padding: 15px 0;
         }
 
-        /* Забранява на последния елемент от има бордер */
+        /* Prevents last element from having a border */
         .incident-item:last-child {
             border-bottom: none;
         }
 
-        /* Стил за типа на инцидентите */
+        /* Styles for incident types */
         .incident-type {
             font-weight: bold;
             color: #00ff7f;
         }
 
-        /* Стил за датата и времето на инцидента */
+        /* Styles for date and time of the incident */
         .incident-time {
             color: #d3d3d3;
             font-size: 0.9em;
@@ -154,80 +154,80 @@
     </style>
 </head>
 <body>
-    <!-- Хедър -->
+    <!-- Header -->
     <header>
         <div class="logo">Urban Guardian</div>
         <nav class="navbar">
             <ul class="nav-list">
-                <li><a href="index.html">Начало</a></li>
-                <li><a href="map.html">Карта</a></li>
-                <li><a href="report.html">Докладване</a></li>
-                <li><a href="about.html">Относно проекта</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="map.html">Map</a></li>
+                <li><a href="report.html">Report</a></li>
+                <li><a href="about.html">About</a></li>
             </ul>
         </nav>
     </header>
 
-    <!-- Секция с статистики -->
+    <!-- Section with statistics -->
     <section class="content-section" id="vanta-bg">
-        <h2>Интерактивни Статистики на Инцидентите</h2>
+        <h2>Interactive Incident Statistics</h2>
         <div class="chart-container">
-            <!-- Канвас за графиката -->
+            <!-- Canvas for the chart -->
             <canvas id="incidentChart"></canvas>
         </div>
 
-        <!-- Списъци с инцидентите -->
+        <!-- Incident lists -->
         <div class="incident-list">
-            <h3>Опасности</h3>
+            <h3>Dangers</h3>
             <div id="dangerIncidents"></div>
 
-            <h3>Злополуки</h3>
+            <h3>Accidents</h3>
             <div id="accidentIncidents"></div>
 
-            <h3>Проблеми с инфраструктура</h3>
+            <h3>Infrastructure Issues</h3>
             <div id="infrastructureIncidents"></div>
         </div>
     </section>
 
     <script>
-        // Vanta.js за анимиран фон
+        // Vanta.js for animated background
         VANTA.NET({
-            el: "#vanta-bg", // Избор на елемент към който ще се приложи анимирания фон
-            color: 0x00ff7f, // Цвята на линиите
-            backgroundColor: 0x121212, // Цвят на фона
-            points: 10.00, // Брой точки
-            maxDistance: 20.00, // Максимално разстояние между точките
-            spacing: 15.00, // Разстояние между мрежите
-            THREE: THREE // Включване на библиотеката THREE.js
+            el: "#vanta-bg", // Selection of element to which the animation will be applied
+            color: 0x00ff7f, // Color of lines
+            backgroundColor: 0x121212, // Color of background
+            points: 10.00, // Number of points
+            maxDistance: 20.00, // Maximum distance between points
+            spacing: 15.00, // Distance between grids
+            THREE: THREE // Inclusion of THREE.js library
         });
 
-        // GSAP за плавно появяване на елементите
+        // GSAP for smooth appearance of elements
         gsap.from(".chart-container", {
-            duration: 1.5, // Време на анимацията
-            opacity: 0, // Плавно появяване от прозрачност 0
-            y: 50, // Преместване от 50пиксела по Y оста
-            ease: "power3.out" // Тип на анимация
+            duration: 1.5, // Animation duration
+            opacity: 0, // Smooth appearance from transparency 0
+            y: 50, // Translation from 50 pixels on Y axis
+            ease: "power3.out" // Animation type
         });
 
         gsap.from(".incident-list", {
             duration: 1.5,
             opacity: 0,
             y: 50,
-            delay: 0.5, // Закъснение на анимацията
+            delay: 0.5, // Animation delay
             ease: "power3.out"
         });
 
-        // Chart.js код за визуализиране на инцидентите
+        // Chart.js code for visualizing incidents
         var ctx = document.getElementById('incidentChart').getContext('2d');
 
         var incidentData = {
-            labels: ["Опасност", "Злополука", "Проблем с инфраструктура"],
+            labels: ["Danger", "Accident", "Infrastructure Issue"],
             datasets: [{
-                label: "Брой инциденти",
-                data: [0, 0, 0],  // Започваме с нула, след което ще обновим данните от localStorage
+                label: "Number of incidents",
+                data: [0, 0, 0],  // Start with zero, then update data from localStorage
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.5)',  // Червено за Опасност
-                    'rgba(255, 159, 64, 0.5)',  // Оранжево за Злополука
-                    'rgba(75, 192, 192, 0.5)'   // Зелено за Проблем с инфраструктура
+                    'rgba(255, 99, 132, 0.5)',  // Red for Danger
+                    'rgba(255, 159, 64, 0.5)',  // Orange for Accident
+                    'rgba(75, 192, 192, 0.5)'   // Green for Infrastructure Issue
                 ],
                 borderColor: [
                     'rgba(255, 99, 132, 1)',
@@ -265,22 +265,22 @@
                 },
                 plugins: {
                     legend: {
-                        display: false // Тук премахваме показването на легендата
+                        display: false // Here we remove the legend display
                     }
                 }
             }
         });
 
-        // Извличане на инциденти от localStorage
+        // Retrieving incidents from localStorage
         function getIncidents() {
-            return JSON.parse(localStorage.getItem('incidents')) || []; // Връща празен масив, ако няма нищо запазено
+            return JSON.parse(localStorage.getItem('incidents')) || []; // Returns empty array if nothing is saved
         }
 
-        // Обновление на графиките и списъците с инциденти
+        // Updating charts and incident lists
         function updateStatistics() {
             var incidents = getIncidents();
 
-            // Изчистване на съществуващите данни
+            // Clearing existing data
             document.getElementById('dangerIncidents').innerHTML = '';
             document.getElementById('accidentIncidents').innerHTML = '';
             document.getElementById('infrastructureIncidents').innerHTML = '';
@@ -289,44 +289,44 @@
             var accidentCount = 0;
             var infrastructureCount = 0;
 
-            // Обход на инцидентите и обновление на категориите
+            // Loop through incidents and update categories
             incidents.forEach(function(incident) {
                 var incidentElement = document.createElement('div');
                 incidentElement.classList.add('incident-item');
                 incidentElement.innerHTML = `
                     <p><span class="incident-type">${incident.type}</span> - ${incident.description}</p>
-                    <p class="incident-time">Дата: ${incident.date} | Локация: ${incident.address}</p>
+                    <p class="incident-time">Date: ${incident.date} | Location: ${incident.address}</p>
                 `;
 
-                if (incident.type === "Опасност") {
+                if (incident.type === "Danger") {
                     document.getElementById('dangerIncidents').appendChild(incidentElement);
                     dangerCount++;
-                } else if (incident.type === "Злополука") {
+                } else if (incident.type === "Accident") {
                     document.getElementById('accidentIncidents').appendChild(incidentElement);
                     accidentCount++;
-                } else if (incident.type === "Проблем с инфраструктура") {
+                } else if (incident.type === "Infrastructure Issue") {
                     document.getElementById('infrastructureIncidents').appendChild(incidentElement);
                     infrastructureCount++;
                 }
             });
 
-            // Проверка дали има инциденти във всяка категория
+            // Check if there are incidents in each category
             if (dangerCount === 0) {
-                document.getElementById('dangerIncidents').innerHTML = '<p>Без докладвани произшествия</p>';
+                document.getElementById('dangerIncidents').innerHTML = '<p>No reported incidents</p>';
             }
             if (accidentCount === 0) {
-                document.getElementById('accidentIncidents').innerHTML = '<p>Без докладвани произшествия</p>';
+                document.getElementById('accidentIncidents').innerHTML = '<p>No reported incidents</p>';
             }
             if (infrastructureCount === 0) {
-                document.getElementById('infrastructureIncidents').innerHTML = '<p>Без докладвани произшествия</p>';
+                document.getElementById('infrastructureIncidents').innerHTML = '<p>No reported incidents</p>';
             }
 
-            // Актуализация на графиките
+            // Updating charts
             incidentData.datasets[0].data = [dangerCount, accidentCount, infrastructureCount];
             incidentChart.update();
         }
 
-        // Извикваме updateStatistics при зареждане на страницата
+        // Calling updateStatistics when the page loads
         updateStatistics();
     </script>
     

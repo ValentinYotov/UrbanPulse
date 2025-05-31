@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Докладване на инцидент - Urban Guardian</title>
+    <title>Report an Incident - Urban Guardian</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -225,42 +225,42 @@
         <div class="logo">Urban Guardian</div>
         <nav class="navbar">
             <ul class="nav-list">
-                <li><a href="index.html">Начало</a></li>
-                <li><a href="map.html">Карта</a></li>
-                <li><a href="statistics.html">Статистики</a></li>
-                <li><a href="about.html">Относно проекта</a></li>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="map.html">Map</a></li>
+                <li><a href="statistics.html">Statistics</a></li>
+                <li><a href="about.html">About</a></li>
             </ul>
         </nav>
     </header>
 
     <!-- Notification -->
-    <div id="notification" class="notification">Докладът беше изпратен успешно!</div>
+    <div id="notification" class="notification">Report submitted successfully!</div>
 
     <!-- Report Form Section -->
     <section class="content-section" id="vanta-bg">
-        <h2>Докладвай инцидент</h2>
+        <h2>Report an Incident</h2>
         <div class="form-container">
             <form id="incidentForm">
-                <label for="incidentType">Тип инцидент:</label>
+                <label for="incidentType">Incident Type:</label>
                 <select id="incidentType" required>
-                    <option value="Опасност">Опасност</option>
-                    <option value="Злополука">Злополука</option>
-                    <option value="Проблем с инфраструктура">Проблем с инфраструктура</option>
+                    <option value="Danger">Danger</option>
+                    <option value="Accident">Accident</option>
+                    <option value="Infrastructure Issue">Infrastructure Issue</option>
                 </select>
-                <label for="incidentDescription">Описание:</label>
+                <label for="incidentDescription">Description:</label>
                 <textarea id="incidentDescription" rows="4" required></textarea>
            
-                <input type="text" id="incidentLocationInput" placeholder="Изберете адрес ">
+                <input type="text" id="incidentLocationInput" placeholder="Select address">
          
-                <label for="incidentLocation">Избери местоположение на картата:</label>
+                <label for="incidentLocation">Select location on the map:</label>
                 <div id="map"></div>
                 <input type="hidden" id="incidentLatitude" name="latitude" required>
                 <input type="hidden" id="incidentLongitude" name="longitude" required>
-                <label for="incidentPhotos">Прикачете снимки:</label>
+                <label for="incidentPhotos">Attach photos:</label>
                 <input type="file" id="incidentPhotos" name="photos" multiple>
                 <div class="image-preview" id="imagePreview"></div>
-                <p id="selectedLocation">Избрана локация: не е избрана</p>
-                <button type="submit">Докладвай</button>
+                <p id="selectedLocation">Selected location: none</p>
+                <button type="submit">Submit Report</button>
             </form>
         </div>
     </section>
@@ -300,7 +300,7 @@
                 reportMap.removeLayer(marker);
             }
     
-            var iconColor = incidentType === "Опасност" ? "red" : incidentType === "Злополука" ? "orange" : "green";
+            var iconColor = incidentType === "Danger" ? "red" : incidentType === "Accident" ? "orange" : "green";
     
             var customIcon = L.divIcon({
                 className: 'custom-icon',
@@ -315,10 +315,10 @@
                 let response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
                 let address = response.data.display_name;
                 document.getElementById('incidentLocationInput').value = address;
-                document.getElementById('selectedLocation').innerText = 'Избрана локация: ' + address;
+                document.getElementById('selectedLocation').innerText = 'Selected location: ' + address;
             } catch (error) {
-                console.error("Неуспешно извличане на адрес", error);
-                document.getElementById('selectedLocation').innerText = 'Избрана локация: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+                console.error("Failed to retrieve address", error);
+                document.getElementById('selectedLocation').innerText = 'Selected location: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
             }
         });
     
@@ -375,13 +375,13 @@
         });
     
         function addMarkerToMap(incident) {
-            var markerColor = incident.type === "Опасност" ? "red" : incident.type === "Злополука" ? "orange" : "green";
+            var markerColor = incident.type === "Danger" ? "red" : incident.type === "Accident" ? "orange" : "green";
             var customIcon = L.divIcon({
                 className: 'custom-icon',
                 html: `<div style="background-color: ${markerColor}; width: 20px; height: 20px; border-radius: 50%;"></div>`
             });
             var marker = L.marker([incident.latitude, incident.longitude], { icon: customIcon }).addTo(reportMap);
-            marker.bindPopup(`<b>${incident.type}</b><br>${incident.description}<br><b>Адрес:</b> ${incident.address}<br><b>Дата:</b> ${incident.date}`);
+            marker.bindPopup(`<b>${incident.type}</b><br>${incident.description}<br><b>Address:</b> ${incident.address}<br><b>Date:</b> ${incident.date}`);
         }
     
         gsap.from(".form-container", {
@@ -406,27 +406,27 @@
     // Подготвяме нови примерни инциденти
     const newIncidents = [
         {
-            type: "Опасност",
-            description: "Кражба на дамска чанта",
-            address: "бул. Цар Освободител 16, София",
+            type: "Danger",
+            description: "Theft of a purse",
+            address: "Tsar Osvoboditel Blvd 16, Sofia",
             latitude: 42.695752,
             longitude: 23.332302,
             date: new Date().toLocaleString(),
             images: []
         },
         {
-            type: "Злополука",
-            description: "Лека катастрофа на кръстовище",
-            address: "ул. Алабин 2, София",
+            type: "Accident",
+            description: "Minor traffic accident at intersection",
+            address: "Alabin St 2, Sofia",
             latitude: 42.697512,
             longitude: 23.318522,
             date: new Date().toLocaleString(),
             images: []
         },
         {
-            type: "Проблем с инфраструктура",
-            description: "Повреден пътен знак на ул. Граф Игнатиев",
-            address: "ул. Граф Игнатиев 10, София",
+            type: "Infrastructure Issue",
+            description: "Damaged road sign on Graf Ignatiev St",
+            address: "Graf Ignatiev St 10, Sofia",
             latitude: 42.690980,
             longitude: 23.325703,
             date: new Date().toLocaleString(),
