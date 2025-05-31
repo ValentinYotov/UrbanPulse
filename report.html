@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Докладване на инцидент - Urban Guardian</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: #121212;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 255, 127, 0.2);
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff7f;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 255, 127, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .logo:hover {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(0, 255, 127, 0.9);
+        }
+
+        .navbar {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-list li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-list li a:hover {
+            color: #00ff7f;
+        }
+
+        .content-section {
+            padding: 120px 20px;
+            text-align: center;
+            background-color: #121212;
+            color: #ffffff;
+            position: relative; 
+            z-index: 1;
+            overflow: hidden; 
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            position: relative;
+            animation: glowBorder 5s infinite alternate;
+            z-index: 2;
+        }
+
+        .form-container label, .form-container input, .form-container select, .form-container textarea, .form-container button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            color: #d3d3d3;
+        }
+
+        .form-container label {
+            font-weight: bold;
+        }
+
+        .form-container input, .form-container select, .form-container textarea {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #00ff7f;
+            background-color: #262626;
+        }
+
+        .form-container button {
+            padding: 15px;
+            border-radius: 5px;
+            border: none;
+            background-color: #00ff7f;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-container button:hover {
+            background-color: #00e673;
+        }
+
+        #map {
+            height: 400px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
+        }
+
+        @keyframes glowBorder {
+            0% {
+                box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(0, 255, 127, 0.8);
+            }
+        }
+
+        .legend {
+            position: fixed;
+            top: 150px;
+            right: 20px;
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
+            animation: glowBorder 3s infinite alternate;
+            z-index: 2;
+        }
+
+        .legend h3 {
+            color: #00ff7f;
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-item span {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
+
+        .legend-item .danger {
+            background-color: red;
+        }
+
+        .legend-item .accident {
+            background-color: orange;
+        }
+
+        .legend-item .infrastructure {
+            background-color: green;
+        }
+
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview img {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #00ff7f;
+            border-radius: 5px;
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #00ff7f;
+            color: #121212;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 999;
+            box-shadow: 0 4px 10px rgba(0, 255, 127, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">Urban Guardian</div>
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="index.html">Начало</a></li>
+                <li><a href="map.html">Карта</a></li>
+                <li><a href="statistics.html">Статистики</a></li>
+                <li><a href="about.html">Относно проекта</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">Докладът беше изпратен успешно!</div>
+
+    <!-- Report Form Section -->
+    <section class="content-section" id="vanta-bg">
+        <h2>Докладвай инцидент</h2>
+        <div class="form-container">
+            <form id="incidentForm">
+                <label for="incidentType">Тип инцидент:</label>
+                <select id="incidentType" required>
+                    <option value="Опасност">Опасност</option>
+                    <option value="Злополука">Злополука</option>
+                    <option value="Проблем с инфраструктура">Проблем с инфраструктура</option>
+                </select>
+                <label for="incidentDescription">Описание:</label>
+                <textarea id="incidentDescription" rows="4" required></textarea>
+           
+                <input type="text" id="incidentLocationInput" placeholder="Изберете адрес ">
+         
+                <label for="incidentLocation">Избери местоположение на картата:</label>
+                <div id="map"></div>
+                <input type="hidden" id="incidentLatitude" name="latitude" required>
+                <input type="hidden" id="incidentLongitude" name="longitude" required>
+                <label for="incidentPhotos">Прикачете снимки:</label>
+                <input type="file" id="incidentPhotos" name="photos" multiple>
+                <div class="image-preview" id="imagePreview"></div>
+                <p id="selectedLocation">Избрана локация: не е избрана</p>
+                <button type="submit">Докладвай</button>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        VANTA.NET({
+            el: "#vanta-bg",
+            color: 0x00ff7f,
+            backgroundColor: 0x121212,
+            points: 12.00,
+            maxDistance: 20.00,
+            spacing: 15.00,
+            THREE: THREE
+        });
+
+        var reportMap = L.map('map').setView([42.6977, 23.3219], 13);
+    
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(reportMap);
+    
+        var marker;
+        var dataStore = JSON.parse(localStorage.getItem('incidents')) || [];
+    
+        // Restore markers from localStorage when the page loads
+        dataStore.forEach(function(incident) {
+            addMarkerToMap(incident);
+        });
+    
+        reportMap.on('click', async function(e) {
+            var lat = e.latlng.lat;
+            var lng = e.latlng.lng;
+            var incidentType = document.getElementById("incidentType").value;
+    
+            if (marker) {
+                reportMap.removeLayer(marker);
+            }
+    
+            var iconColor = incidentType === "Опасност" ? "red" : incidentType === "Злополука" ? "orange" : "green";
+    
+            var customIcon = L.divIcon({
+                className: 'custom-icon',
+                html: `<div style="background-color: ${iconColor}; width: 20px; height: 20px; border-radius: 50%;"></div>`
+            });
+    
+            marker = L.marker([lat, lng], { icon: customIcon }).addTo(reportMap);
+            document.getElementById('incidentLatitude').value = lat;
+            document.getElementById('incidentLongitude').value = lng;
+    
+            try {
+                let response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+                let address = response.data.display_name;
+                document.getElementById('incidentLocationInput').value = address;
+                document.getElementById('selectedLocation').innerText = 'Избрана локация: ' + address;
+            } catch (error) {
+                console.error("Неуспешно извличане на адрес", error);
+                document.getElementById('selectedLocation').innerText = 'Избрана локация: ' + lat.toFixed(5) + ', ' + lng.toFixed(5);
+            }
+        });
+    
+        document.getElementById('incidentPhotos').addEventListener('change', function(event) {
+            var files = event.target.files;
+            var imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
+    
+            Array.from(files).forEach(function(file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    imagePreview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    
+        document.getElementById('incidentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+    
+            var incidentType = document.getElementById('incidentType').value;
+            var description = document.getElementById('incidentDescription').value;
+            var address = document.getElementById('incidentLocationInput').value;
+            var latitude = document.getElementById('incidentLatitude').value;
+            var longitude = document.getElementById('incidentLongitude').value;
+            var date = new Date().toLocaleString();
+            var photos = Array.from(document.getElementById('incidentPhotos').files).map(file => URL.createObjectURL(file));
+    
+            var incident = {
+                type: incidentType,
+                description: description,
+                address: address,
+                latitude: latitude,
+                longitude: longitude,
+                date: date,
+                images: photos
+            };
+    
+            dataStore.push(incident);
+            localStorage.setItem('incidents', JSON.stringify(dataStore));
+    
+            addMarkerToMap(incident);
+    
+            var notification = document.getElementById('notification');
+            notification.style.display = 'block';
+            setTimeout(function() {
+                notification.style.display = 'none';
+            }, 3000);
+    
+            document.getElementById('incidentForm').reset();
+            document.getElementById('imagePreview').innerHTML = '';
+        });
+    
+        function addMarkerToMap(incident) {
+            var markerColor = incident.type === "Опасност" ? "red" : incident.type === "Злополука" ? "orange" : "green";
+            var customIcon = L.divIcon({
+                className: 'custom-icon',
+                html: `<div style="background-color: ${markerColor}; width: 20px; height: 20px; border-radius: 50%;"></div>`
+            });
+            var marker = L.marker([incident.latitude, incident.longitude], { icon: customIcon }).addTo(reportMap);
+            marker.bindPopup(`<b>${incident.type}</b><br>${incident.description}<br><b>Адрес:</b> ${incident.address}<br><b>Дата:</b> ${incident.date}`);
+        }
+    
+        gsap.from(".form-container", {
+            duration: 1.5,
+            opacity: 0,
+            y: 50,
+            ease: "power3.out"
+        });
+    
+        gsap.from(".legend", {
+            duration: 1.5,
+            opacity: 0,
+            x: 50,
+            delay: 0.5,
+            ease: "power3.out"
+        });
+
+        function resetIncidents() {
+    // Изчистваме всички записи от localStorage
+    localStorage.removeItem('incidents');
+
+    // Подготвяме нови примерни инциденти
+    const newIncidents = [
+        {
+            type: "Опасност",
+            description: "Кражба на дамска чанта",
+            address: "бул. Цар Освободител 16, София",
+            latitude: 42.695752,
+            longitude: 23.332302,
+            date: new Date().toLocaleString(),
+            images: []
+        },
+        {
+            type: "Злополука",
+            description: "Лека катастрофа на кръстовище",
+            address: "ул. Алабин 2, София",
+            latitude: 42.697512,
+            longitude: 23.318522,
+            date: new Date().toLocaleString(),
+            images: []
+        },
+        {
+            type: "Проблем с инфраструктура",
+            description: "Повреден пътен знак на ул. Граф Игнатиев",
+            address: "ул. Граф Игнатиев 10, София",
+            latitude: 42.690980,
+            longitude: 23.325703,
+            date: new Date().toLocaleString(),
+            images: []
+        }
+    ];
+
+    // Запазваме новите инциденти в localStorage
+    localStorage.setItem('incidents', JSON.stringify(newIncidents));
+
+    // Обновяване на картата и списъка с инциденти
+    updateStatistics();
+    location.reload(); // Презареждаме страницата за обновяване на информацията
+}
+
+// Извикваме функцията resetIncidents(), за да добавим примерни инциденти
+resetIncidents();
+    </script>
+</body>
+</html>

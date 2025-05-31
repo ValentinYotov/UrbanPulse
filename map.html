@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <!-- Задаване на основните мета тагове и връзки към външни ресурси -->
+    <meta charset="UTF-8"> <!-- Определя енкодинга на страницата като UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Позволява коректно рендиране на мобилни устройства -->
+    <title>Urban Guardian - Карта на инциденти</title> <!-- Заглавие на страницата -->
+    
+    <!-- Връзка към шрифт от Google Fonts с различни дебелини -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Връзка към CSS и JavaScript за библиотеката Leaflet, използвана за картата -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    
+    <!-- Включване на GSAP и Anime.js за анимации -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Вътрешен CSS стил за оформление на страницата -->
+    <style>
+        /* Задаване на основни стилове за цялата страница */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #2e2e2e;
+            color: #ffffff;
+            overflow-x: hidden; /* Предотвратява хоризонтално скролиране */
+        }
+
+        /* Стил за хедъра на страницата */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: #121212;
+            position: fixed; /* Закрепва го на върха на екрана */
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 255, 127, 0.2);
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff7f;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 255, 127, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .logo:hover {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(0, 255, 127, 0.9);
+        }
+
+        .navbar {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Стили за навигационното меню */
+        .nav-list {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-list li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-list li a:hover {
+            color: #00ff7f;
+        }
+
+        /* Стилове за контейнера на картата */
+        .map-container {
+            height: 80vh;
+            margin-top: 100px;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Стилове за самата карта */
+        #map {
+            height: 100%;
+            border-radius: 20px;
+            box-shadow: 0 0 25px rgba(0, 255, 127, 0.6);
+            transition: box-shadow 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        #map:hover {
+            box-shadow: 0 0 40px rgba(0, 255, 127, 1);
+            transform: scale(1.02);
+        }
+
+        /* Легендата на картата с инциденти */
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .legend-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        /* Цвят за различните типове инциденти в легендата */
+        .legend-dot.danger {
+            background-color: red;
+        }
+
+        .legend-dot.accident {
+            background-color: orange;
+        }
+
+        .legend-dot.infrastructure {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <!-- Заглавие и навигация на страницата -->
+    <header>
+        <div class="logo">Urban Guardian</div>
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="index.html">Начало</a></li>
+                <li><a href="report.html">Докладване</a></li>
+                <li><a href="statistics.html">Статистики</a></li>
+                <li><a href="about.html">Относно проекта</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Контейнер за картата и легендата -->
+    <div class="map-container">
+        <div id="map"></div>
+        <div class="legend" id="legend">
+            <div class="legend-item">
+                <div class="legend-dot danger"></div>
+                Опасност
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot accident"></div>
+                Злополука
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot infrastructure"></div>
+                Проблем с инфраструктурата
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация на картата с център в София, България
+        var map = L.map('map').setView([42.6977, 23.3219], 13);
+        
+        // Добавяне на основен слой от OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Зареждане на инциденти от локалното хранилище и добавяне на маркери на картата
+        var incidents = JSON.parse(localStorage.getItem('incidents')) || [];
+        incidents.forEach(function (incident) {
+            var markerColor;
+
+            // Определяне на цвета на маркера според типа на инцидента
+            switch (incident.type) {
+                case 'Опасност':
+                    markerColor = 'red';
+                    break;
+                case 'Злополука':
+                    markerColor = 'orange';
+                    break;
+                case 'Проблем с инфраструктура':
+                    markerColor = 'green';
+                    break;
+            }
+
+            // Добавяне на маркер на картата с конкретен цвят и попъп информация
+            var marker = L.circleMarker([incident.latitude, incident.longitude], {
+                color: markerColor,
+                radius: 8
+            }).addTo(map);
+
+            var imageGallery = incident.images && incident.images.length > 0 ? `<div><b>Снимки:</b><br>` + incident.images.map(img => `<img src="${img}" style="max-width:100px;margin:5px;border:1px solid #00ff7f;border-radius:5px;">`).join('') + `</div>` : '';
+            marker.bindPopup("<b>" + incident.type + "</b><br>" + incident.description + "<br><b>Адрес:</b> " + incident.address + "<br><b>Дата:</b> " + incident.date + "<br><b></b> " + "<br>" + imageGallery);
+        });
+
+        // Анимация за появяване на легендата с Anime.js
+        anime({
+            targets: '#legend',
+            translateY: [-50, 0],
+            opacity: [0, 1],
+            duration: 1500,
+            easing: 'easeOutExpo'
+        });
+
+        // Добавяне на анимации при ховър за легендата с GSAP
+        var legend = document.getElementById('legend');
+
+// Когато курсорът минава върху легендата - леко увеличаване и добавяне на светлинен ефект
+legend.addEventListener('mouseenter', function () {
+    gsap.to('#legend', {
+        scale: 1.05,
+        duration: 0.5,
+        ease: 'power2.inOut',
+        boxShadow: '0px 0px 20px rgba(0, 255, 127, 0.7)',
+    });
+});
+
+// Когато курсорът напуска легендата - връщане на първоначалния вид
+legend.addEventListener('mouseleave', function () {
+    gsap.to('#legend', {
+        scale: 1,
+        duration: 0.5,
+        ease: 'power2.inOut',
+        boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.3)',
+    });
+});
+
+// Анимация за картата при зареждане на страницата с GSAP
+gsap.from("#map", {
+    duration: 1.5,
+    scale: 0.9,
+    opacity: 0,
+    ease: "power2.out",
+});
+</script>
+</body>
+</html>
