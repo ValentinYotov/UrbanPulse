@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Pulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.21/dist/vanta.net.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.7.9/lottie.min.js"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popmotion/dist/popmotion.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mo-js@0.288.2/dist/mo.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.5.2/velocity.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.8/ScrollMagic.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: #121212;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 255, 127, 0.2);
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff7f;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 255, 127, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .logo:hover {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(0, 255, 127, 0.9);
+        }
+
+        .navbar {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-list li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+
+        .nav-list li a:hover {
+            color: #00ff7f;
+        }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px;
+            z-index: 1;
+        }
+
+        .hero-content {
+            z-index: 10;
+        }
+
+        .hero-content h1 {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 0;
+            color: #00ff7f;
+            text-shadow: 2px 4px 20px rgba(0, 255, 127, 0.5);
+        }
+
+        .hero-content p {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+
+        .hero-buttons a {
+            text-decoration: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.4s;
+            color: #ffffff;
+        }
+
+        .primary-button {
+            background-color: #00ff7f;
+            box-shadow: 0 8px 15px rgba(0, 255, 127, 0.4);
+        }
+
+        .primary-button:hover {
+            background-color: #00e673;
+            box-shadow: 0 15px 20px rgba(0, 255, 127, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .secondary-button {
+            background-color: #1e90ff;
+            box-shadow: 0 8px 15px rgba(30, 144, 255, 0.4);
+        }
+
+        .secondary-button:hover {
+            background-color: #1c86ee;
+            box-shadow: 0 15px 20px rgba(30, 144, 255, 0.6);
+            transform: translateY(-3px);
+        }
+
+        /* Services Section */
+        .services-section {
+            padding: 80px 20px;
+            text-align: center;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .services-section h2 {
+            font-size: 3em;
+            color: #00ff7f;
+            margin-bottom: 40px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .services-section h2::after {
+            content: '';
+            width: 50px;
+            height: 4px;
+            background-color: #00ff7f;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -10px;
+        }
+
+        .service-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .service-card {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            width: 300px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(0, 255, 127, 0.2);
+        }
+
+        .service-card:hover {
+            box-shadow: 0 12px 30px rgba(0, 255, 127, 0.4);
+            transform: translateY(-10px);
+        }
+
+        .service-card i {
+            font-size: 3em;
+            color: #00ff7f;
+            margin-bottom: 20px;
+        }
+
+        .service-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #00ff7f;
+        }
+
+        .service-card p {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #d3d3d3;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #121212;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            color: #ffffff;
+        }
+
+        footer .footer-links {
+            margin-top: 20px;
+        }
+
+        footer .footer-links a {
+            color: #00ff7f;
+            text-decoration: none;
+            margin: 0 20px;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        footer .footer-links a:hover {
+            color: #1e90ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">Urban Pulse</div>
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="map.html">Map</a></li>
+                <li><a href="report.html">Report</a></li>
+                <li><a href="statistics.html">Statistics</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="vanta-background">
+        <div class="hero-content">
+            <h1>Sofia, the city we deserve</h1>
+            <p id="typed-text"></p>
+            <div class="hero-buttons">
+                <a href="report.html" class="primary-button">Report an incident</a>
+                <a href="about.html" class="secondary-button">Learn more</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services-section">
+        <h2>What you can find on the site</h2>
+        <div class="service-cards">
+            <div class="service-card" id="card1">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Incident Reporting</h3>
+                <p>Easy reporting of incidents and problems, turning Sofia into the capital city it deserves to be.</p>
+            </div>
+            <div class="service-card" id="card2">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Interactive Map</h3>
+                <p>Mark the location of incidents and see all registered problems on the map.</p>
+            </div>
+            <div class="service-card" id="card3">
+                <i class="fas fa-chart-line"></i>
+                <h3>Statistics and Analysis</h3>
+                <p>Get access to statistics and analysis that help you better understand common issues.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Vanta.js Net Effect
+        VANTA.NET({
+            el: "#vanta-background",
+            color: 0x00ff7f, // Зелен цвят на мрежата
+            backgroundColor: 0x121212,
+            points: 15.00,
+            maxDistance: 20.00,
+            spacing: 18.00,
+            showDots: true,
+            touchControls: true,
+            gyroControls: true,
+            THREE: THREE
+        });
+
+        // Typed.js за динамичен текст в Hero секцията
+        var typed = new Typed("#typed-text", {
+            strings: ["Together", "we can", "do more"],
+            typeSpeed: 50,
+            backSpeed: 25,
+            loop:true
+        });
+    </script>
+</body>
+</html>

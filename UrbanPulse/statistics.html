@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Defines the document type and language (English) -->
+    <meta charset="UTF-8">
+    <!-- Sets viewport settings for proper display on smartphones and other devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Page title -->
+    <title>Interactive Incident Statistics - Urban Pulse</title>
+    <!-- Includes Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Includes Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Includes Chart.js library for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Includes GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <!-- Includes Vanta.js for animated background -->
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    <!-- Includes Three.js library, needed for Vanta.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* Styles the body of the page */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Styles the header of the page */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: #121212;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 255, 127, 0.2);
+        }
+
+        /* Styles the logo */
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00ff7f;
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 255, 127, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Animation when hovering over the logo */
+        .logo:hover {
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(0, 255, 127, 0.9);
+        }
+
+        /* Styles the navigation */
+        .navbar {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Styles for links in the navigation */
+        .nav-list li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+
+        /* Changes color when hovering over links */
+        .nav-list li a:hover {
+            color: #00ff7f;
+        }
+
+        /* Styles for content sections */
+        .content-section {
+            padding: 120px 20px;
+            text-align: center;
+            background-color: #121212;
+            color: #ffffff;
+            position: relative; /* Added for Vanta background */
+            z-index: 1;
+            overflow: hidden; /* To contain Vanta background */
+        }
+
+        /* Styles for charts and incident lists */
+        .chart-container, .incident-list {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            animation: glowBorder 5s infinite alternate;
+            position: relative;
+            z-index: 2; /* To ensure it stays above the Vanta background */
+        }
+
+        .incident-list {
+            text-align: left;
+        }
+
+        /* Border animation (soft glow) */
+        @keyframes glowBorder {
+            0% {
+                box-shadow: 0 0 15px rgba(0, 255, 127, 0.4);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(0, 255, 127, 0.8);
+            }
+        }
+
+        /* Styles for elements in incident lists */
+        .incident-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+        }
+
+        /* Prevents last element from having a border */
+        .incident-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Styles for incident types */
+        .incident-type {
+            font-weight: bold;
+            color: #00ff7f;
+        }
+
+        /* Styles for date and time of the incident */
+        .incident-time {
+            color: #d3d3d3;
+            font-size: 0.9em;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">Urban Pulse</div>
+        <nav class="navbar">
+            <ul class="nav-list">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="map.html">Map</a></li>
+                <li><a href="report.html">Report</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Section with statistics -->
+    <section class="content-section" id="vanta-bg">
+        <h2>Interactive Incident Statistics</h2>
+        <div class="chart-container">
+            <!-- Canvas for the chart -->
+            <canvas id="incidentChart"></canvas>
+        </div>
+
+        <!-- Incident lists -->
+        <div class="incident-list">
+            <h3>Dangers</h3>
+            <div id="dangerIncidents"></div>
+
+            <h3>Accidents</h3>
+            <div id="accidentIncidents"></div>
+
+            <h3>Infrastructure Issues</h3>
+            <div id="infrastructureIncidents"></div>
+        </div>
+    </section>
+
+    <script>
+        // Vanta.js for animated background
+        VANTA.NET({
+            el: "#vanta-bg", // Selection of element to which the animation will be applied
+            color: 0x00ff7f, // Color of lines
+            backgroundColor: 0x121212, // Color of background
+            points: 10.00, // Number of points
+            maxDistance: 20.00, // Maximum distance between points
+            spacing: 15.00, // Distance between grids
+            THREE: THREE // Inclusion of THREE.js library
+        });
+
+        // GSAP for smooth appearance of elements
+        gsap.from(".chart-container", {
+            duration: 1.5, // Animation duration
+            opacity: 0, // Smooth appearance from transparency 0
+            y: 50, // Translation from 50 pixels on Y axis
+            ease: "power3.out" // Animation type
+        });
+
+        gsap.from(".incident-list", {
+            duration: 1.5,
+            opacity: 0,
+            y: 50,
+            delay: 0.5, // Animation delay
+            ease: "power3.out"
+        });
+
+        // Chart.js code for visualizing incidents
+        var ctx = document.getElementById('incidentChart').getContext('2d');
+
+        var incidentData = {
+            labels: ["Danger", "Accident", "Infrastructure Issue"],
+            datasets: [{
+                label: "Number of incidents",
+                data: [0, 0, 0],  // Start with zero, then update data from localStorage
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)',  // Red for Danger
+                    'rgba(255, 159, 64, 0.5)',  // Orange for Accident
+                    'rgba(75, 192, 192, 0.5)'   // Green for Infrastructure Issue
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        var incidentChart = new Chart(ctx, {
+            type: 'bar',
+            data: incidentData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.2)'
+                        },
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false // Here we remove the legend display
+                    }
+                }
+            }
+        });
+
+        // Retrieving incidents from localStorage
+        function getIncidents() {
+            return JSON.parse(localStorage.getItem('incidents')) || []; // Returns empty array if nothing is saved
+        }
+
+        // Updating charts and incident lists
+        function updateStatistics() {
+            var incidents = getIncidents();
+
+            // Clearing existing data
+            document.getElementById('dangerIncidents').innerHTML = '';
+            document.getElementById('accidentIncidents').innerHTML = '';
+            document.getElementById('infrastructureIncidents').innerHTML = '';
+
+            var dangerCount = 0;
+            var accidentCount = 0;
+            var infrastructureCount = 0;
+
+            // Loop through incidents and update categories
+            incidents.forEach(function(incident) {
+                var incidentElement = document.createElement('div');
+                incidentElement.classList.add('incident-item');
+                incidentElement.innerHTML = `
+                    <p><span class="incident-type">${incident.type}</span> - ${incident.description}</p>
+                    <p class="incident-time">Date: ${incident.date} | Location: ${incident.address}</p>
+                `;
+
+                if (incident.type === "Danger") {
+                    document.getElementById('dangerIncidents').appendChild(incidentElement);
+                    dangerCount++;
+                } else if (incident.type === "Accident") {
+                    document.getElementById('accidentIncidents').appendChild(incidentElement);
+                    accidentCount++;
+                } else if (incident.type === "Infrastructure Issue") {
+                    document.getElementById('infrastructureIncidents').appendChild(incidentElement);
+                    infrastructureCount++;
+                }
+            });
+
+            // Check if there are incidents in each category
+            if (dangerCount === 0) {
+                document.getElementById('dangerIncidents').innerHTML = '<p>No reported incidents</p>';
+            }
+            if (accidentCount === 0) {
+                document.getElementById('accidentIncidents').innerHTML = '<p>No reported incidents</p>';
+            }
+            if (infrastructureCount === 0) {
+                document.getElementById('infrastructureIncidents').innerHTML = '<p>No reported incidents</p>';
+            }
+
+            // Updating charts
+            incidentData.datasets[0].data = [dangerCount, accidentCount, infrastructureCount];
+            incidentChart.update();
+        }
+
+        // Calling updateStatistics when the page loads
+        updateStatistics();
+    </script>
+    
+</body>
+</html>
