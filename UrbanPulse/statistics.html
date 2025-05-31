@@ -163,6 +163,8 @@
                 <li><a href="map.html">Map</a></li>
                 <li><a href="report.html">Report</a></li>
                 <li><a href="about.html">About</a></li>
+                <li><a href="login.html">Log In</a></li>
+                <li><a href="signup.html">Sign Up</a></li>
             </ul>
         </nav>
     </header>
@@ -189,6 +191,11 @@
     </section>
 
     <script>
+        // Check if user is logged in, otherwise redirect to login page
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
         // Vanta.js for animated background
         VANTA.NET({
             el: "#vanta-bg", // Selection of element to which the animation will be applied
@@ -328,6 +335,12 @@
 
         // Calling updateStatistics when the page loads
         updateStatistics();
+
+        document.getElementById('logout-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.setItem('isLoggedIn', 'false');
+            window.location.href = 'login.html';
+        });
     </script>
     
 </body>

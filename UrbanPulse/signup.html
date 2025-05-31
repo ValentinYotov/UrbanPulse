@@ -201,9 +201,15 @@
 
         // Placeholder for Firebase signup
         document.getElementById('signupForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault(); // Prevent default form submission for now
             // Add Firebase signup logic here later
             console.log('Sign Up form submitted');
+
+            // Simulate successful signup
+            localStorage.setItem('isLoggedIn', 'true');
+
+            // Redirect to index page
+            window.location.href = 'index.html';
         });
     </script>
 </body>

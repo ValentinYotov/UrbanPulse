@@ -148,7 +148,7 @@
 <body>
     <!-- Header -->
     <header>
-        <div class="logo">Urban Pulse</div>
+        <div class="logo"><a href="index.html">Urban Pulse</a></div>
         <nav class="navbar">
             <ul class="nav-list">
                 <li><a href="index.html">Home</a></li>
@@ -198,9 +198,15 @@
 
         // Placeholder for Firebase login
         document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
+            event.preventDefault(); // Prevent default form submission for now
             // Add Firebase login logic here later
             console.log('Login form submitted');
+
+            // Simulate successful login
+            localStorage.setItem('isLoggedIn', 'true');
+
+            // Redirect to index page
+            window.location.href = 'index.html';
         });
     </script>
 </body>

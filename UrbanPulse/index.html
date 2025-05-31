@@ -246,6 +246,8 @@
                 <li><a href="report.html">Report</a></li>
                 <li><a href="statistics.html">Statistics</a></li>
                 <li><a href="about.html">About</a></li>
+                <li><a href="login.html">Log In</a></li>
+                <li><a href="signup.html">Sign Up</a></li>
             </ul>
         </nav>
     </header>
@@ -305,6 +307,19 @@
             typeSpeed: 50,
             backSpeed: 25,
             loop:true
+        });
+
+        // Check if user is logged in, otherwise redirect to login page
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+    <script>
+        document.getElementById('logout-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.setItem('isLoggedIn', 'false');
+            window.location.href = 'login.html';
         });
     </script>
 </body>
