@@ -17,13 +17,15 @@ const OpenAI = require("openai");
 // Get the OpenAI API key from Firebase Environment Configuration
 
 // Learn more: https://firebase.google.com/docs/functions/config-env
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 // Define an HTTP callable function for the chatbot
 // This function will receive POST requests from your frontend
 exports.askAI = onRequest(async (request, response) => {
+  // Initialize OpenAI client inside the function handler
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
   logger.info(
       "Received request for askAI function",
       {structuredData: true},

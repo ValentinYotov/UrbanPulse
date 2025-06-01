@@ -307,6 +307,10 @@
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
 
+        // *** REPLACE WITH YOUR DEPLOYED FUNCTION URL ***
+        const ASK_AI_FUNCTION_URL = 'https://us-central1-urbanpulse-4ecaa.cloudfunctions.net/askAI';
+        // ************************************************
+
         function appendMessage(sender, message) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('message', sender);
@@ -331,20 +335,53 @@
             // and the server would call OpenAI and return the response.
             // For now, we'll simulate a response.
             
-            // Simulate AI thinking/typing
+            // Simulate AI thinking/typing - keep for better UX
             const typingIndicator = document.createElement('div');
             typingIndicator.classList.add('message', 'ai', 'typing-indicator');
             typingIndicator.textContent = '...'; // Or add a proper typing animation
             chatWindow.appendChild(typingIndicator);
-             chatWindow.scrollTop = chatWindow.scrollHeight;
+            chatWindow.scrollTop = chatWindow.scrollHeight;
 
-            // Simulate API call delay
-            setTimeout(() => {
-                chatWindow.removeChild(typingIndicator); // Remove typing indicator
-                 chatWindow.scrollTop = chatWindow.scrollHeight;
-                // Simulate AI response
-                appendMessage('ai', 'This is a simulated response for: \'' + message + '\'\n\nTo use the real OpenAI API securely, a backend is required.');
-            }, 1500);
+            try {
+                // Send message to your Firebase Cloud Function
+                const response = await fetch(ASK_AI_FUNCTION_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                });
+
+                // Remove typing indicator
+                chatWindow.removeChild(typingIndicator);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                if (!response.ok) {
+                    // Handle HTTP errors (e.g., 400, 500)
+                    const errorData = await response.json();
+                    throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
+                }
+
+                const data = await response.json();
+                
+                // Append AI's response
+                if (data && data.reply) {
+                    appendMessage('ai', data.reply);
+                } else {
+                    appendMessage('ai', 'Error: Invalid response from AI.');
+                    console.error('Invalid AI response data:', data);
+                }
+
+            } catch (error) {
+                // Handle network errors or errors from the function
+                console.error('Error sending message to function:', error);
+                 // Remove typing indicator if still there
+                 const currentTypingIndicator = chatWindow.querySelector('.typing-indicator');
+                 if(currentTypingIndicator) {
+                      chatWindow.removeChild(currentTypingIndicator);
+                 }
+                appendMessage('ai', 'Error: Could not get a response from the AI.');
+            }
         }
 
         sendButton.addEventListener('click', sendMessage);
