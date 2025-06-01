@@ -9,6 +9,7 @@
 
 const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
+// const functions = require('firebase-functions'); // Remove or comment out this line
 
 // Import the OpenAI library
 const OpenAI = require('openai');
@@ -17,7 +18,8 @@ const OpenAI = require('openai');
 // You need to set this configuration using `firebase functions:config:set openai.key="YOUR_API_KEY"`
 // Learn more: https://firebase.google.com/docs/functions/config-env
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || functions.config().openai.key, // Use process.env for V2, or functions.config() for V1
+  // Use process.env for V2 functions after setting config or env variables
+  apiKey: process.env.OPENAI_API_KEY, 
 });
 
 // Create and deploy your first functions
@@ -34,7 +36,8 @@ exports.askAI = onRequest(async (request, response) => {
   logger.info("Received request for askAI function", {structuredData: true});
 
   // Set CORS headers for cross-origin requests
-  response.set('Access-Control-Allow-Origin', '*'); // Be more restrictive in production if possible
+  // In production, restrict this to your frontend's domain
+  response.set('Access-Control-Allow-Origin', '*'); 
 
   // Handle preflight requests (OPTIONS method)
   if (request.method === 'OPTIONS') {
