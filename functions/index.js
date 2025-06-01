@@ -10,6 +10,16 @@
 const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 
+// Import the OpenAI library
+const OpenAI = require('openai');
+
+// Get the OpenAI API key from Firebase Environment Configuration
+// You need to set this configuration using `firebase functions:config:set openai.key="YOUR_API_KEY"`
+// Learn more: https://firebase.google.com/docs/functions/config-env
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || functions.config().openai.key, // Use process.env for V2, or functions.config() for V1
+});
+
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
@@ -17,3 +27,54 @@ const logger = require("firebase-functions/logger");
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
 // });
+
+// Define an HTTP callable function for the chatbot
+// This function will receive POST requests from your frontend
+exports.askAI = onRequest(async (request, response) => {
+  logger.info("Received request for askAI function", {structuredData: true});
+
+  // Set CORS headers for cross-origin requests
+  response.set('Access-Control-Allow-Origin', '*'); // Be more restrictive in production if possible
+
+  // Handle preflight requests (OPTIONS method)
+  if (request.method === 'OPTIONS') {
+    response.set('Access-Control-Allow-Methods', 'POST');
+    response.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.status(204).send('');
+    return;
+  }
+
+  // Ensure the request is a POST request
+  if (request.method !== 'POST') {
+    response.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  const userMessage = request.body.message;
+
+  if (!userMessage) {
+    logger.warn("Missing 'message' in request body.");
+    response.status(400).send("Missing 'message' parameter.");
+    return;
+  }
+
+  logger.info(`User message: "${userMessage}"`);
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo", // Or another suitable model
+      messages: [{role: "user", content: userMessage}],
+    });
+
+    const aiResponse = completion.choices[0].message.content;
+    logger.info(`AI response: "${aiResponse}"`);
+
+    // Send the AI's response back to the frontend
+    response.status(200).json({ reply: aiResponse });
+
+  } catch (error) {
+    logger.error("Error calling OpenAI API:", error);
+    // Return a more generic error message to the client for security
+    response.status(500).json({ error: 'Error processing your request.' });
+  }
+});
