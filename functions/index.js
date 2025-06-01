@@ -7,25 +7,24 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
+// The Cloud Functions for Firebase SDK to create Cloud Functions and triggers.
 const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
-// const functions = require('firebase-functions'); // Remove or comment out this line
 
 // Import the OpenAI library
-const OpenAI = require('openai');
+const OpenAI = require("openai");
 
 // Get the OpenAI API key from Firebase Environment Configuration
 // You need to set this configuration using `firebase functions:config:set openai.key="YOUR_API_KEY"`
 // Learn more: https://firebase.google.com/docs/functions/config-env
 const openai = new OpenAI({
-  // Use process.env for V2 functions after setting config or env variables
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 // Define an HTTP callable function for the chatbot
 // This function will receive POST requests from your frontend
 exports.askAI = onRequest(async (request, response) => {
-  logger.info("Received request for askAI function", { structuredData: true });
+  logger.info("Received request for askAI function", {structuredData: true});
 
   // Set CORS headers for cross-origin requests
   // In production, restrict this to your frontend's domain
@@ -57,19 +56,16 @@ exports.askAI = onRequest(async (request, response) => {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Or another suitable model
-      messages: [{ role: "user", content: userMessage }],
+      model: "gpt-3.5-turbo",
+      messages: [{role: "user", content: userMessage}]
     });
 
     const aiResponse = completion.choices[0].message.content;
     logger.info(`AI response: "${aiResponse}"`);
 
-    // Send the AI's response back to the frontend
-    response.status(200).json({ reply: aiResponse });
-
+    response.status(200).json({reply: aiResponse});
   } catch (error) {
     logger.error("Error calling OpenAI API:", error);
-    // Return a more generic error message to the client for security
-    response.status(500).json({ error: 'Error processing your request.' });
+    response.status(500).json({error: "Error processing your request."});
   }
 });
