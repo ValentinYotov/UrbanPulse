@@ -18,13 +18,16 @@ const OpenAI = require("openai");
 // You need to set this configuration using `firebase functions:config:set openai.key="YOUR_API_KEY"`
 // Learn more: https://firebase.google.com/docs/functions/config-env
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Define an HTTP callable function for the chatbot
 // This function will receive POST requests from your frontend
 exports.askAI = onRequest(async (request, response) => {
-  logger.info("Received request for askAI function", {structuredData: true});
+  logger.info(
+    "Received request for askAI function",
+    {structuredData: true},
+  );
 
   // Set CORS headers for cross-origin requests
   // In production, restrict this to your frontend's domain
@@ -57,15 +60,19 @@ exports.askAI = onRequest(async (request, response) => {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [{role: "user", content: userMessage}]
+      messages: [
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ],
     });
 
-    const aiResponse = completion.choices[0].message.content;
-    logger.info(`AI response: "${aiResponse}"`);
+      const aiResponse = completion.choices[0].message.content;
+      logger.info(`AI response: "${aiResponse}"`);
 
     response.status(200).json({reply: aiResponse});
   } catch (error) {
     logger.error("Error calling OpenAI API:", error);
     response.status(500).json({error: "Error processing your request."});
   }
-});
