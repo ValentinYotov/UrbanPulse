@@ -19,37 +19,29 @@ const OpenAI = require('openai');
 // Learn more: https://firebase.google.com/docs/functions/config-env
 const openai = new OpenAI({
   // Use process.env for V2 functions after setting config or env variables
-  apiKey: process.env.OPENAI_API_KEY, 
+  apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
 
 // Define an HTTP callable function for the chatbot
 // This function will receive POST requests from your frontend
 exports.askAI = onRequest(async (request, response) => {
-  logger.info("Received request for askAI function", {structuredData: true});
+  logger.info("Received request for askAI function", { structuredData: true });
 
   // Set CORS headers for cross-origin requests
   // In production, restrict this to your frontend's domain
-  response.set('Access-Control-Allow-Origin', '*'); 
+  response.set("Access-Control-Allow-Origin", "*");
 
   // Handle preflight requests (OPTIONS method)
-  if (request.method === 'OPTIONS') {
-    response.set('Access-Control-Allow-Methods', 'POST');
-    response.set('Access-Control-Allow-Headers', 'Content-Type');
-    response.status(204).send('');
+  if (request.method === "OPTIONS") {
+    response.set("Access-Control-Allow-Methods", "POST");
+    response.set("Access-Control-Allow-Headers", "Content-Type");
+    response.status(204).send("");
     return;
   }
 
   // Ensure the request is a POST request
-  if (request.method !== 'POST') {
-    response.status(405).send('Method Not Allowed');
+  if (request.method !== "POST") {
+    response.status(405).send("Method Not Allowed");
     return;
   }
 
@@ -66,7 +58,7 @@ exports.askAI = onRequest(async (request, response) => {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo", // Or another suitable model
-      messages: [{role: "user", content: userMessage}],
+      messages: [{ role: "user", content: userMessage }],
     });
 
     const aiResponse = completion.choices[0].message.content;
