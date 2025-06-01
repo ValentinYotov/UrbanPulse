@@ -10,15 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-    </script>
-    
     <!-- Firebase Config -->
     <script type="module" src="firebase-config.js"></script>
     <style>
@@ -165,7 +156,9 @@
         </div>
     </section>
 
-    <script>
+    <script type="module">
+        import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
+
         VANTA.NET({
             el: "#vanta-bg",
             color: 0x00ff7f,
@@ -183,35 +176,68 @@
             ease: "power3.out"
         });
 
-        // Placeholder for Firebase login
+        // Handle login form submission
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
+            console.log('Login form submitted.');
+            console.log('Email:', email);
+
             try {
+                console.log('Attempting to sign in with email and password...');
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('User signed in successfully:', userCredential);
+                
                 const user = userCredential.user;
                 
                 // Store user info in localStorage
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userEmail', user.email);
                 
+                console.log('User info stored in localStorage.');
+                console.log('Redirecting to index.html...');
+                
                 // Redirect to home page
                 window.location.href = 'index.html';
             } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
+                console.error('Login error caught:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                let errorMsg = error.message;
+                
+                 if (error.code === 'auth/user-not-found') {
+                    errorMsg = 'No user found with this email.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMsg = 'Incorrect password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMsg = 'Please enter a valid email address.';
+                } else if (error.code === 'auth/invalid-credential') {
+                     errorMsg = 'Invalid credentials. Please check your email and password.';
+                } else if (error.code === 'auth/user-disabled') {
+                     errorMsg = 'This user account has been disabled.';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMsg = 'Too many login attempts. Please try again later.';
+                }
+                
+                alert('Login failed: ' + errorMsg);
             }
         });
 
         // Check if user is already logged in
         onAuthStateChanged(auth, (user) => {
+            console.log('onAuthStateChanged triggered.');
             if (user) {
+                console.log('User is logged in:', user);
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('userEmail', user.email);
+                 console.log('User already logged in, redirecting to index.html');
                 window.location.href = 'index.html';
+            } else {
+                 console.log('User is not logged in.');
             }
         });
     </script>
