@@ -15,7 +15,7 @@ const logger = require("firebase-functions/logger");
 const OpenAI = require("openai");
 
 // Get the OpenAI API key from Firebase Environment Configuration
-// You need to set this configuration using `firebase functions:config:set openai.key="YOUR_API_KEY"`
+
 // Learn more: https://firebase.google.com/docs/functions/config-env
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -25,8 +25,8 @@ const openai = new OpenAI({
 // This function will receive POST requests from your frontend
 exports.askAI = onRequest(async (request, response) => {
   logger.info(
-    "Received request for askAI function",
-    {structuredData: true},
+      "Received request for askAI function",
+      {structuredData: true},
   );
 
   // Set CORS headers for cross-origin requests
@@ -68,11 +68,12 @@ exports.askAI = onRequest(async (request, response) => {
       ],
     });
 
-      const aiResponse = completion.choices[0].message.content;
-      logger.info(`AI response: "${aiResponse}"`);
+    const aiResponse = completion.choices[0].message.content;
+    logger.info(`AI response: "${aiResponse}"`);
 
     response.status(200).json({reply: aiResponse});
   } catch (error) {
     logger.error("Error calling OpenAI API:", error);
     response.status(500).json({error: "Error processing your request."});
   }
+});
