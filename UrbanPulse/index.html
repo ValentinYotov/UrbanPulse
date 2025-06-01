@@ -246,6 +246,7 @@
                 <li><a href="report.html">Report</a></li>
                 <li><a href="statistics.html">Statistics</a></li>
                 <li><a href="about.html">About</a></li>
+                <li><a href="#" id="logout-link">Log Out</a></li>
             </ul>
         </nav>
     </header>
@@ -284,7 +285,31 @@
         </div>
     </section>
 
-    <script>
+    <script type="module">
+        import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
+
+        // Check if user is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logout-link').addEventListener('click', async function(event) {
+            event.preventDefault();
+            try {
+                await signOut(auth);
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Logout failed: ' + error.message);
+            }
+        });
+
         // Vanta.js Net Effect
         VANTA.NET({
             el: "#vanta-background",
@@ -305,19 +330,6 @@
             typeSpeed: 50,
             backSpeed: 25,
             loop:true
-        });
-
-        // Check if user is logged in, otherwise redirect to login page
-        if (localStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'login.html';
-        }
-    </script>
-
-    <script>
-        document.getElementById('logout-link').addEventListener('click', function(event) {
-            event.preventDefault();
-            localStorage.setItem('isLoggedIn', 'false');
-            window.location.href = 'login.html';
         });
     </script>
 </body>

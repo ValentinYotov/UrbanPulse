@@ -17,6 +17,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    </script>
+    
+    <!-- Firebase Config -->
+    <script type="module" src="firebase-config.js"></script>
+    
     <!-- Вътрешен CSS стил за оформление на страницата -->
     <style>
         /* Задаване на основни стилове за цялата страница */
@@ -152,9 +164,11 @@
         <nav class="navbar">
             <ul class="nav-list">
                 <li><a href="index.html">Home</a></li>
+                <li><a href="map.html">Map</a></li>
                 <li><a href="report.html">Report</a></li>
                 <li><a href="statistics.html">Statistics</a></li>
                 <li><a href="about.html">About</a></li>
+                <li><a href="#" id="logout-link">Log Out</a></li>
             </ul>
         </nav>
     </header>
@@ -178,11 +192,29 @@
         </div>
     </div>
 
-    <script>
-        // Check if user is logged in, otherwise redirect to login page
-        if (localStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'login.html';
-        }
+    <script type="module">
+        import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
+
+        // Check if user is logged in
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logout-link').addEventListener('click', async function(event) {
+            event.preventDefault();
+            try {
+                await signOut(auth);
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userEmail');
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Logout failed: ' + error.message);
+            }
+        });
 
         // Инициализация на картата с център в София, България
         var map = L.map('map').setView([42.6977, 23.3219], 13);
@@ -260,12 +292,6 @@ gsap.from("#map", {
     opacity: 0,
     ease: "power2.out",
 });
-
-        document.getElementById('logout-link').addEventListener('click', function(event) {
-            event.preventDefault();
-            localStorage.setItem('isLoggedIn', 'false');
-            window.location.href = 'login.html';
-        });
     </script>
 </body>
 </html>
