@@ -204,7 +204,7 @@
     </section>
 
     <script type="module">
-        import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
+        import { auth, signOut, onAuthStateChanged } from '../js/firebase-config.js';
 
         // Check if user is logged in
         onAuthStateChanged(auth, (user) => {

@@ -194,7 +194,8 @@
     </div>
 
     <script type="module">
-        import { auth, signOut, onAuthStateChanged } from './firebase-config.js';
+        import { auth, signOut, onAuthStateChanged, db } from '../js/firebase-config.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Check if user is logged in
         onAuthStateChanged(auth, (user) => {
@@ -217,42 +218,61 @@
             }
         });
 
-        // Инициализация на картата с център в София, България
-        var map = L.map('map').setView([42.6977, 23.3219], 13);
+        // Initialize map
+        const map = L.map('map').setView([42.6977, 23.3219], 13);
         
-        // Добавяне на основен слой от OpenStreetMap
+        // Add tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Зареждане на инциденти от локалното хранилище и добавяне на маркери на картата
-        var incidents = JSON.parse(localStorage.getItem('incidents')) || [];
-        incidents.forEach(function (incident) {
-            var markerColor;
+        // Load incidents from Firebase
+        async function loadIncidents() {
+            try {
+                const incidentsRef = collection(db, 'incidents');
+                const snapshot = await getDocs(incidentsRef);
+                
+                snapshot.forEach((doc) => {
+                    const incident = doc.data();
+                    let markerColor;
 
-            // Определяне на цвета на маркера според типа на инцидента
-            switch (incident.type) {
-                case 'Danger':
-                    markerColor = 'red';
-                    break;
-                case 'Accident':
-                    markerColor = 'orange';
-                    break;
-                case 'Infrastructure Issue':
-                    markerColor = 'green';
-                    break;
+                    // Determine marker color based on incident type
+                    switch (incident.type) {
+                        case 'Danger':
+                            markerColor = 'red';
+                            break;
+                        case 'Accident':
+                            markerColor = 'orange';
+                            break;
+                        case 'Infrastructure Issue':
+                            markerColor = 'green';
+                            break;
+                        default:
+                            markerColor = 'blue';
+                    }
+
+                    // Add marker to map
+                    const marker = L.circleMarker([incident.latitude, incident.longitude], {
+                        color: markerColor,
+                        radius: 8,
+                        fillOpacity: 0.7
+                    }).addTo(map);
+
+                    // Add popup with incident information
+                    marker.bindPopup(`
+                        <strong>Type:</strong> ${incident.type}<br>
+                        <strong>Description:</strong> ${incident.description}<br>
+                        <strong>Date:</strong> ${new Date(incident.timestamp).toLocaleString()}
+                    `);
+                });
+            } catch (error) {
+                console.error('Error loading incidents:', error);
             }
+        }
 
-            // Добавяне на маркер на картата с конкретен цвят и попъп информация
-            var marker = L.circleMarker([incident.latitude, incident.longitude], {
-                color: markerColor,
-                radius: 8
-            }).addTo(map);
-
-            var imageGallery = incident.images && incident.images.length > 0 ? `<div><b>Images:</b><br>` + incident.images.map(img => `<img src="${img}" style="max-width:100px;margin:5px;border:1px solid #00ff7f;border-radius:5px;">`).join('') + `</div>` : '';
-            marker.bindPopup("<b>" + incident.type + "</b><br>" + incident.description + "<br><b>Address:</b> " + incident.address + "<br><b>Date:</b> " + incident.date + "<br><b></b> " + "<br>" + imageGallery);
-        });
+        // Load incidents when the page loads
+        loadIncidents();
 
         // Анимация за появяване на легендата с Anime.js
         anime({
