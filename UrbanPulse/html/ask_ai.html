@@ -354,12 +354,17 @@
                 });
 
                 // Remove typing indicator
-                chatWindow.removeChild(typingIndicator);
+                if (chatWindow.contains(typingIndicator)) {
+                    chatWindow.removeChild(typingIndicator);
+                }
                 chatWindow.scrollTop = chatWindow.scrollHeight;
 
                 if (!response.ok) {
                     // Handle HTTP errors (e.g., 400, 500)
-                    const errorData = await response.json();
+                    let errorData = {};
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {}
                     throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData.error || 'Unknown error'}`);
                 }
 
@@ -376,12 +381,16 @@
             } catch (error) {
                 // Handle network errors or errors from the function
                 console.error('Error sending message to function:', error);
-                 // Remove typing indicator if still there
-                 const currentTypingIndicator = chatWindow.querySelector('.typing-indicator');
-                 if(currentTypingIndicator) {
-                      chatWindow.removeChild(currentTypingIndicator);
-                 }
-                appendMessage('ai', 'Error: Could not get a response from the AI.');
+                // Remove typing indicator if still there
+                const currentTypingIndicator = chatWindow.querySelector('.typing-indicator');
+                if(currentTypingIndicator) {
+                    chatWindow.removeChild(currentTypingIndicator);
+                }
+                if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+                    appendMessage('ai', 'Network error: Could not reach the AI server. This is often caused by CORS issues. Моля, уверете се, че функцията е деплойната с правилните CORS настройки.');
+                } else {
+                    appendMessage('ai', 'Error: Could not get a response from the AI.');
+                }
             }
         }
 
