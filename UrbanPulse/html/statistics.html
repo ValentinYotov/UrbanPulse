@@ -205,6 +205,8 @@
 
     <script type="module">
         import { auth, signOut, onAuthStateChanged } from '../js/firebase-config.js';
+        import { db } from '../js/firebase-config.js';
+        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Check if user is logged in
         onAuthStateChanged(auth, (user) => {
@@ -309,14 +311,20 @@
             }
         });
 
-        // Retrieving incidents from localStorage
-        function getIncidents() {
-            return JSON.parse(localStorage.getItem('incidents')) || []; // Returns empty array if nothing is saved
+        // Retrieving incidents from Firestore
+        async function getIncidents() {
+            const incidentsRef = collection(db, 'incidents');
+            const snapshot = await getDocs(incidentsRef);
+            const incidents = [];
+            snapshot.forEach(doc => {
+                incidents.push(doc.data());
+            });
+            return incidents;
         }
 
         // Updating charts and incident lists
-        function updateStatistics() {
-            var incidents = getIncidents();
+        async function updateStatistics() {
+            var incidents = await getIncidents();
 
             // Clearing existing data
             document.getElementById('dangerIncidents').innerHTML = '';

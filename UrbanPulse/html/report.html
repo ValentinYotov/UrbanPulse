@@ -18,7 +18,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
     </script>
@@ -390,7 +390,7 @@
             });
         });
     
-        document.getElementById('incidentForm').addEventListener('submit', function(event) {
+        document.getElementById('incidentForm').addEventListener('submit', async function(event) {
             event.preventDefault();
     
             var incidentType = document.getElementById('incidentType').value;
@@ -399,31 +399,47 @@
             var latitude = document.getElementById('incidentLatitude').value;
             var longitude = document.getElementById('incidentLongitude').value;
             var date = new Date().toLocaleString();
+            // Фотографиите ще се качват отделно, ако има такава функционалност
+            // Засега просто ще запазваме URL-ите на временните обекти
             var photos = Array.from(document.getElementById('incidentPhotos').files).map(file => URL.createObjectURL(file));
     
-            var incident = {
+            // Prepare data for Firestore
+            var incidentData = {
                 type: incidentType,
                 description: description,
                 address: address,
-                latitude: latitude,
-                longitude: longitude,
+                latitude: parseFloat(latitude),
+                longitude: parseFloat(longitude),
                 date: date,
-                images: photos
+                images: photos // Placeholder for image URLs
             };
     
-            dataStore.push(incident);
-            localStorage.setItem('incidents', JSON.stringify(dataStore));
+            try {
+                // Add incident to Firestore
+                await addDoc(collection(db, 'incidents'), incidentData);
+                console.log("Incident successfully written to Firestore!");
     
-            addMarkerToMap(incident);
+                var notification = document.getElementById('notification');
+                notification.style.display = 'block';
+                setTimeout(function() {
+                    notification.style.display = 'none';
+                }, 3000);
     
-            var notification = document.getElementById('notification');
-            notification.style.display = 'block';
-            setTimeout(function() {
-                notification.style.display = 'none';
-            }, 3000);
+                document.getElementById('incidentForm').reset();
+                document.getElementById('imagePreview').innerHTML = '';
+                
+                // Clear the map marker and selected location display
+                if (marker) {
+                    reportMap.removeLayer(marker);
+                    marker = null; // Reset marker
+                }
+                document.getElementById('incidentLocationInput').value = '';
+                document.getElementById('selectedLocation').innerText = 'Selected location: none';
     
-            document.getElementById('incidentForm').reset();
-            document.getElementById('imagePreview').innerHTML = '';
+            } catch (error) {
+                console.error("Error writing incident to Firestore: ", error);
+                alert("Failed to submit report. Please try again.");
+            }
         });
     
         function addMarkerToMap(incident) {
@@ -450,52 +466,6 @@
             delay: 0.5,
             ease: "power3.out"
         });
-
-        function resetIncidents() {
-    // Clear all entries from localStorage
-    localStorage.removeItem('incidents');
-
-    // Prepare new sample incidents
-    const newIncidents = [
-        {
-            type: "Danger",
-            description: "Theft of a purse",
-            address: "Tsar Osvoboditel Blvd 16, Sofia",
-            latitude: 42.695752,
-            longitude: 23.332302,
-            date: new Date().toLocaleString(),
-            images: []
-        },
-        {
-            type: "Accident",
-            description: "Minor traffic accident at intersection",
-            address: "Alabin St 2, Sofia",
-            latitude: 42.697512,
-            longitude: 23.318522,
-            date: new Date().toLocaleString(),
-            images: []
-        },
-        {
-            type: "Infrastructure Issue",
-            description: "Damaged road sign on Graf Ignatiev St",
-            address: "Graf Ignatiev St 10, Sofia",
-            latitude: 42.690980,
-            longitude: 23.325703,
-            date: new Date().toLocaleString(),
-            images: []
-        }
-    ];
-
-    // Save the new incidents to localStorage
-    localStorage.setItem('incidents', JSON.stringify(newIncidents));
-
-    // Updating the map and the incident list
-    updateStatistics();
-    location.reload(); // Reload the page to update the information
-}
-
-// Call the resetIncidents() function to add sample incidents
-resetIncidents();
     </script>
 </body>
 </html>
