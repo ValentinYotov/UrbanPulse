@@ -10,6 +10,7 @@
 // The Cloud Functions for Firebase SDK to create Cloud Functions and triggers.
 const {onRequest} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
+const functions = require("firebase-functions");
 
 // Import the OpenAI library
 const OpenAI = require("openai");
@@ -21,27 +22,25 @@ const OpenAI = require("openai");
 // Define an HTTP callable function for the chatbot
 // This function will receive POST requests from your frontend
 exports.askAI = onRequest(async (request, response) => {
+  response.header("Access-Control-Allow-Origin", "*");
+  response.header("Access-Control-Allow-Headers", "Content-Type");
+  response.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+
+  if (request.method === "OPTIONS") {
+    response.status(204).send("");
+    return;
+  }
+
   // Initialize OpenAI client inside the function handler
+  const openaiKey = process.env.OPENAI_API_KEY || (functions.config().openai && functions.config().openai.key);
   const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: openaiKey,
   });
 
   logger.info(
       "Received request for askAI function",
       {structuredData: true},
   );
-
-  // Set CORS headers for cross-origin requests
-  // In production, restrict this to your frontend's domain
-  response.set("Access-Control-Allow-Origin", "*");
-
-  // Handle preflight requests (OPTIONS method)
-  if (request.method === "OPTIONS") {
-    response.set("Access-Control-Allow-Methods", "POST");
-    response.set("Access-Control-Allow-Headers", "Content-Type");
-    response.status(204).send("");
-    return;
-  }
 
   // Ensure the request is a POST request
   if (request.method !== "POST") {
