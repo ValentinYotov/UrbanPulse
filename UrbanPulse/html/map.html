@@ -195,7 +195,7 @@
 
     <script type="module">
         import { auth, signOut, onAuthStateChanged, db } from '../js/firebase-config.js';
-        import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Check if user is logged in
         onAuthStateChanged(auth, (user) => {
@@ -233,8 +233,8 @@
                 const incidentsRef = collection(db, 'incidents');
                 const snapshot = await getDocs(incidentsRef);
                 
-                snapshot.forEach((doc) => {
-                    const incident = doc.data();
+                snapshot.forEach((docSnap) => {
+                    const incident = docSnap.data();
                     let markerColor;
 
                     // Determine marker color based on incident type
@@ -259,12 +259,27 @@
                         fillOpacity: 0.7
                     }).addTo(map);
 
-                    // Add popup with incident information
+                    // Add popup with incident information and delete button
                     marker.bindPopup(`
                         <strong>Type:</strong> ${incident.type}<br>
                         <strong>Description:</strong> ${incident.description}<br>
-                        <strong>Date:</strong> ${new Date(incident.timestamp).toLocaleString()}
+                        <strong>Date:</strong> ${incident.date ? incident.date : ''}<br>
+                        <button class="delete-incident-btn" data-id="${docSnap.id}">Delete</button>
                     `);
+
+                    marker.on('popupopen', function() {
+                        setTimeout(() => {
+                            const btn = document.querySelector('.delete-incident-btn[data-id="' + docSnap.id + '"]');
+                            if (btn) {
+                                btn.onclick = async function() {
+                                    if (confirm('Are you sure you want to delete this incident?')) {
+                                        await deleteDoc(doc(db, 'incidents', docSnap.id));
+                                        map.removeLayer(marker);
+                                    }
+                                };
+                            }
+                        }, 100);
+                    });
                 });
             } catch (error) {
                 console.error('Error loading incidents:', error);
