@@ -1,4 +1,3 @@
-
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -10,7 +9,7 @@ const firebaseConfig = {
     apiKey: "AIzaSyCURxrXn0V1Y6E_MWmJehPpQtfQACpirO8",
     authDomain: "urbanpulse-4ecaa.firebaseapp.com",
     projectId: "urbanpulse-4ecaa",
-    storageBucket: "urbanpulse-4ecaa.firebasestorage.app",
+    storageBucket: "urbanpulse-4ecaa.appspot.com",
     messagingSenderId: "570129928438",
     appId: "1:570129928438:web:e03506362dd43ca9705cd7",
     measurementId: "G-X4RKBC61Z8"
